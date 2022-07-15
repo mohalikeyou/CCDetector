@@ -1,0 +1,984 @@
+<source file="systems/chainer-7.8.1/chainer/testing/function_link.py" startline="224" endline="267" pcid="3026"></source>
+    def run_test_backward(self, backend_config):
+        # Runs the backward test.
+
+        if self.skip_backward_test:
+            raise unittest.SkipTest('skip_backward_test is set')
+
+        # avoid cyclic import
+        from chainer import gradient_check
+
+        self.backend_config = backend_config
+        self.test_name = 'test_backward'
+        self.before_test(self.test_name)
+
+        def f(*args):
+            return self._forward(args, backend_config)
+
+        def do_check():
+            inputs = self._generate_inputs()
+            outputs = self._forward_expected(inputs)
+            grad_outputs = self._generate_grad_outputs(outputs)
+
+            inputs = backend_config.get_array(inputs)
+            grad_outputs = backend_config.get_array(grad_outputs)
+            inputs = self._to_noncontiguous_as_needed(inputs)
+            grad_outputs = self._to_noncontiguous_as_needed(grad_outputs)
+
+            with FunctionTestError.raise_if_fail(
+                    'backward is not implemented correctly'):
+                gradient_check.check_backward(
+                    f, inputs, grad_outputs, dtype=self.numerical_grad_dtype,
+                    detect_nondifferentiable=self.dodge_nondifferentiable,
+                    **self.check_backward_options)
+
+        if self.dodge_nondifferentiable:
+            while True:
+                try:
+                    do_check()
+                except gradient_check.NondifferentiableError:
+                    continue
+                else:
+                    break
+        else:
+            do_check()
+
+            model.predictor.train = True
+            print('test mean  loss: {}, accuracy: {}'.format(
+                sum_loss / test_count, sum_accuracy / test_count))
+            sum_accuracy = 0
+            sum_loss = 0
+
+
+        return tuple(rets)
+
+
+                y1, y2, y3 = output_data
+                assert isinstance(y1, backward_xp.ndarray)
+                assert isinstance(y2, backward_xp.ndarray)
+                assert y3 is None
+
+                # attribute fallback
+                assert isinstance(self.array_init, backward_xp.ndarray)
+                assert isinstance(self.array_forward, backward_xp.ndarray)
+                self.array_backward = backward_xp.array([4], numpy.float32)
+                assert isinstance(self.array_backward, backward_xp.ndarray)
+
+                gx1 = x3 * gy2  # + gy3
+                gx2 = None
+                gx3 = x1 * gy2  # + gy3
+                return gx1, gx2, gx3
+
+        return Func()(x1, x2, x3)
+
+
+    trainer.run()
+
+
+
+    # Write a log of evaluation statistics for each epoch
+    trainer.extend(extensions.LogReport(), call_before_training=True)
+
+    # Save two plot images to the result dir
+    trainer.extend(
+        extensions.PlotReport(['main/loss', 'validation/main/loss'],
+                              'epoch', file_name='loss.png'),
+        call_before_training=True)
+    trainer.extend(
+        extensions.PlotReport(
+            ['main/accuracy', 'validation/main/accuracy'],
+            'epoch', file_name='accuracy.png'),
+        call_before_training=True)
+
+    # Print selected entries of the log to stdout
+    # Here "main" refers to the target link of the "main" optimizer again, and
+    # "validation" refers to the default name of the Evaluator extension.
+    # Entries other than 'epoch' are reported by the Classifier link, called by
+    # either the updater or the evaluator.
+    trainer.extend(extensions.PrintReport(
+        ['epoch', 'main/loss', 'validation/main/loss',
+         'main/accuracy', 'validation/main/accuracy', 'elapsed_time']),
+        call_before_training=True)
+
+    # Print a progress bar to stdout
+    trainer.extend(extensions.ProgressBar())
+
+    if args.resume is not None:
+        # Resume from a snapshot (Note: this loaded model is to be
+        # overwritten by --autoload option, autoloading snapshots, if
+        # any snapshots exist in output directory)
+        chainer.serializers.load_npz(args.resume, trainer)
+
+    # Run the training
+    trainer.run()
+
+
+        diagonal.
+
+Returns:
+    ~chainerx.ndarray: Upper triangle of ``m``.
+
+.. seealso:: :func:`numpy.triu`
+""")
+
+    _docs.set_doc(
+        chainerx.identity,
+        """identity(n, dtype=None, device=None)
+Returns a 2-D identity array.
+
+It is equivalent to ``eye(n, n, dtype)``.
+
+Args:
+    n (int): Number of rows and columns.
+    dtype: Data type.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: A 2-D identity array.
+
+.. seealso:: :func:`numpy.identity`
+""")
+
+    _docs.set_doc(
+        chainerx.ones,
+        """ones(shape, dtype, device=None)
+Returns a new array of given shape and dtype, filled with ones.
+
+Args:
+    shape (tuple of ints): Shape of the array.
+    dtype: Data type.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: New array.
+
+.. seealso:: :func:`numpy.ones`
+""")
+
+    _docs.set_doc(
+        chainerx.ones_like,
+        """ones_like(a, device=None)
+Returns an array of ones with same shape and dtype as a given array.
+
+Args:
+    a (~chainerx.ndarray): Prototype array.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: New array.
+
+Warning:
+    If ``device`` argument is omitted, the new array is created on the default
+    device, not the device of the prototype array.
+
+.. seealso:: :func:`numpy.ones_like`
+""")
+
+    _docs.set_doc(
+        chainerx.zeros,
+        """zeros(shape, dtype, device=None)
+Returns a new array of given shape and dtype, filled with zeros.
+
+Args:
+    shape (tuple of ints): Shape of the array.
+    dtype: Data type.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: New array.
+
+.. seealso:: :func:`numpy.zeros`
+""")
+
+    _docs.set_doc(
+        chainerx.zeros_like,
+        """zeros_like(a, device=None)
+Returns an array of zeros with same shape and dtype as a given array.
+
+Args:
+    a (~chainerx.ndarray): Prototype array.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: New array.
+
+Warning:
+    If ``device`` argument is omitted, the new array is created on the default
+    device, not the device of the prototype array.
+
+.. seealso:: :func:`numpy.zeros_like`
+""")
+
+    _docs.set_doc(
+        chainerx.full,
+        """full(shape, fill_value, dtype, device=None)
+Returns a new array of given shape and dtype, filled with a given value.
+
+Args:
+    shape (tuple of ints): Shape of the array.
+    dtype: Data type.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: New array.
+
+.. seealso:: :func:`numpy.full`
+""")
+
+    _docs.set_doc(
+        chainerx.full_like,
+        """full_like(a, fill_value, dtype=None, device=None)
+Returns a full array with same shape and dtype as a given array.
+
+Args:
+    a (~chainerx.ndarray): Prototype array.
+    dtype: Data type.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: New array.
+
+Warning:
+    If ``device`` argument is omitted, the new array is created on the default
+    device, not the device of the prototype array.
+
+.. seealso:: :func:`numpy.full_like`
+""")
+
+    _docs.set_doc(
+        chainerx.array,
+        """array(object, dtype=None, copy=True, device=None)
+Creates an array.
+
+Args:
+    object: A :class:`~chainerx.ndarray` object or any other object that can be
+        passed to :func:`numpy.array`.
+    dtype: Data type. If omitted, it's inferred from the input.
+    copy (bool): If ``True``, the object is always copied. Otherwise, a copy
+        will only be made if it is needed to satisfy any of the other
+        requirements (dtype, device, etc.).
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: New array.
+
+Warning:
+    If ``device`` argument is omitted, the new array is created on the default
+    device, not the device of the input array.
+
+.. seealso:: :func:`numpy.array`
+""")
+
+    _docs.set_doc(
+        chainerx.asarray,
+        """asarray(a, dtype=None, device=None)
+Converts an object to an array.
+
+Args:
+    a: The source object.
+    dtype: Data type. If omitted, it's inferred from the input.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: Array interpretation of ``a``. If ``a`` is already an \
+ndarray on the given device with matching dtype, no copy is performed.
+
+Warning:
+    If ``device`` argument is omitted, the new array is created on the default
+    device, not the device of the input array.
+
+.. seealso:: :func:`numpy.asarray`
+""")
+
+    _docs.set_doc(
+        chainerx.ascontiguousarray,
+        """ascontiguousarray(a, dtype=None, device=None)
+Returns a C-contiguous array.
+
+Args:
+    a (~chainerx.ndarray): Source array.
+    dtype: Data type.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: C-contiguous array. A copy will be made only if needed.
+
+Warning:
+    If ``device`` argument is omitted, the new array is created on the default
+    device, not the device of the input array.
+
+.. seealso:: :func:`numpy.ascontiguousarray`
+""")
+
+    _docs.set_doc(
+        chainerx.copy,
+        """copy(a)
+Creates a copy of a given array.
+
+Args:
+    a (~chainerx.ndarray): Source array.
+
+Returns:
+    ~chainerx.ndarray: A copy array on the same device as ``a``.
+
+Note:
+    During backpropagation, this function propagates the gradient of the
+    output array to the input array ``a``.
+
+.. seealso:: :func:`numpy.copy`
+""")
+
+    _docs.set_doc(
+        chainerx.frombuffer,
+        """frombuffer(buffer, dtype=float, count=-1, offset=0, device=None)
+Returns a 1-D array interpretation of a buffer.
+
+The given ``buffer`` memory must be usable on the given device, otherwise,
+an error is raised.
+
+Note:
+    The ``native`` backend requires a buffer of main memory, and
+    the ``cuda`` backend requires a buffer of CUDA memory.
+    No copy is performed.
+
+Args:
+    buffer: An object that exposes the buffer interface.
+    dtype: Data type of the returned array.
+    count (int): Number of items to read. -1 means all data in the buffer.
+    offset (int): Start reading the buffer from this offset (in bytes).
+    device (~chainerx.Device): Device of the returned array.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: 1-D array interpretation of ``buffer``.
+
+.. seealso:: :func:`numpy.frombuffer`
+""")
+
+    _docs.set_doc(
+        chainerx.arange,
+        """arange([start=0, ]stop, [step=1, ]dtype=None, device=None)
+Returns an array with  evenly spaced values within a given interval.
+
+Values are generated within the half-open interval [``start``, ``stop``).
+The first three arguments are mapped like the ``range`` built-in function,
+i.e. ``start`` and ``step`` are optional.
+
+Args:
+    start: Start of the interval.
+    stop: End of the interval.
+    step: Step width between each pair of consecutive values.
+    dtype: Data type specifier. It is inferred from other arguments by
+        default.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: The 1-D array of range values.
+
+.. seealso:: :func:`numpy.arange`
+""")
+
+    _docs.set_doc(
+        chainerx.linspace,
+        """linspace(start, stop, num=50, endpoint=True, dtype=None, device=None)
+Returns an array with evenly spaced numbers over a specified interval.
+
+Instead of specifying the step width like :func:`chainerx.arange()`,
+this function requires the total number of elements specified.
+
+Args:
+    start: Start of the interval.
+    stop: End of the interval.
+    num: Number of elements.
+    endpoint (bool): If ``True``, the stop value is included as the last
+        element. Otherwise, the stop value is omitted.
+    dtype: Data type specifier. It is inferred from the start and stop
+        arguments by default.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: The 1-D array of ranged values.
+
+.. seealso:: :func:`numpy.linspace`
+""")  # NOQA
+
+    _docs.set_doc(
+        chainerx.diag,
+        """diag(v, k=0, device=None)
+Returns a diagonal or a diagonal array.
+
+Args:
+    v (~chainerx.ndarray): Array object.
+    k (int): Index of diagonals. Zero indicates the main diagonal, a
+        positive value an upper diagonal, and a negative value a lower
+        diagonal.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: If ``v`` is a 1-D array, then it returns a 2-D
+    array with the specified diagonal filled by ``v``. If ``v`` is a
+    2-D array, then it returns the specified diagonal of ``v``. In latter
+    case, if ``v`` is a :class:`chainerx.ndarray` object, then its view is
+    returned.
+
+Note:
+    The argument ``v`` does not support array-like objects yet.
+
+.. seealso:: :func:`numpy.diag`
+""")
+
+    _docs.set_doc(
+        chainerx.diagflat,
+        """diagflat(v, k=0, device=None)
+Creates a diagonal array from the flattened input.
+
+Args:
+    v (~chainerx.ndarray): Array object.
+    k (int): Index of diagonals. See :func:`chainerx.diag`.
+    device (~chainerx.Device): Device on which the array is allocated.
+        If omitted, :ref:`the default device <chainerx_device>` is chosen.
+
+Returns:
+    ~chainerx.ndarray: A 2-D diagonal array with the diagonal copied
+    from ``v``.
+
+Note:
+    The argument ``v`` does not support array-like objects yet.
+
+.. seealso:: :func:`numpy.diagflat`
+""")
+
+    _docs.set_doc(
+        chainerx.meshgrid,
+        """meshgrid(xi, indexing='xy')
+Returns coordinate matrices from coordinate vectors.
+
+Make N-D coordinate arrays for vectorized evaluations of N-D scalar/vector
+fields over N-D grids, given one-dimensional coordinate arrays x1, x2,…, xn.
+
+Args:
+    xi (sequence of :class:`~chainerx.ndarray`\\ s): 1-D arrays
+        representing the coordinates of a grid.
+    indexing (str): {‘xy’, ‘ij’}, optional
+        Cartesian (‘xy’, default) or matrix (‘ij’) indexing of output.
+
+Returns:
+    list of :class:`~chainerx.ndarray`\\ s: For vectors x1, x2,…, ‘xn’ with
+    lengths Ni=len(xi), return (N1, N2, N3,...Nn) shaped arrays if
+    indexing=’ij’ or (N2, N1, N3,...Nn) shaped arrays if indexing=’xy’
+    with the elements of xi repeated to fill the matrix along the first
+    dimension for x1, the second for x2 and so on.
+
+.. seealso:: :func:`numpy.meshgrid`
+""")
+
+
+<source file="systems/chainer-7.8.1/chainer/testing/function_link.py" startline="268" endline="326" pcid="3029"></source>
+    def run_test_double_backward(self, backend_config):
+        # Runs the double-backward test.
+
+        if self.skip_double_backward_test:
+            raise unittest.SkipTest('skip_double_backward_test is set')
+
+        # avoid cyclic import
+        from chainer import gradient_check
+
+        self.backend_config = backend_config
+        self.test_name = 'test_double_backward'
+        self.before_test(self.test_name)
+
+        def f(*args):
+            return self._forward(args, backend_config)
+
+        def do_check():
+            inputs = self._generate_inputs()
+            outputs = self._forward_expected(inputs)
+            grad_outputs = self._generate_grad_outputs(outputs)
+            grad_grad_inputs = self._generate_grad_grad_inputs(inputs)
+
+            # Drop ggx corresponding to non-differentiable inputs.
+            # Generated `grad_grad_inputs`, the upstream gradients for the
+            # double backward test, may contain `None` for omitted gradients.
+            # These must be propagated to the gradient check.
+            grad_grad_inputs = [
+                ggx for ggx in grad_grad_inputs
+                if (ggx is None or ggx.dtype.kind == 'f')]
+
+            inputs = backend_config.get_array(inputs)
+            grad_outputs = backend_config.get_array(grad_outputs)
+            grad_grad_inputs = backend_config.get_array(grad_grad_inputs)
+            inputs = self._to_noncontiguous_as_needed(inputs)
+            grad_outputs = self._to_noncontiguous_as_needed(grad_outputs)
+            grad_grad_inputs = (
+                self._to_noncontiguous_as_needed(grad_grad_inputs))
+
+            with backend_config:
+                with FunctionTestError.raise_if_fail(
+                        'double backward is not implemented correctly'):
+                    gradient_check.check_double_backward(
+                        f, inputs, grad_outputs, grad_grad_inputs,
+                        dtype=self.numerical_grad_dtype,
+                        detect_nondifferentiable=self.dodge_nondifferentiable,
+                        **self.check_double_backward_options)
+
+        if self.dodge_nondifferentiable:
+            while True:
+                try:
+                    do_check()
+                except gradient_check.NondifferentiableError:
+                    continue
+                else:
+                    break
+        else:
+            do_check()
+
+
+                y1, y2, = retained_outputs
+                assert isinstance(y1.array, backward_xp.ndarray)
+                assert isinstance(y2.array, backward_xp.ndarray)
+
+                # attribute fallback
+                assert isinstance(self.array_init, backward_xp.ndarray)
+                assert isinstance(self.array_forward, backward_xp.ndarray)
+                self.array_backward = backward_xp.array([4], numpy.float32)
+                assert isinstance(self.array_backward, backward_xp.ndarray)
+
+                gx1 = x3 * gy2  # + gy3
+                gx2 = None
+                gx3 = x1 * gy2  # + gy3
+                return gx1, gx2, gx3
+
+        return Func().apply((x1, x2, x3))
+
+    trainer.extend(extensions.ProgressBar())
+
+    if args.resume:
+        chainer.serializers.load_npz(args.resume, trainer)
+
+    trainer.run()
+
+
+        call_before_training=True)
+    trainer.extend(
+        extensions.PlotReport(
+            ['main/accuracy', 'validation/main/accuracy'],
+            'epoch', file_name='accuracy.png'),
+        call_before_training=True)
+
+    # Print selected entries of the log to stdout
+    # Here "main" refers to the target link of the "main" optimizer again, and
+    # "validation" refers to the default name of the Evaluator extension.
+    # Entries other than 'epoch' are reported by the Classifier link, called by
+    # either the updater or the evaluator.
+    trainer.extend(extensions.PrintReport(
+        ['epoch', 'main/loss', 'validation/main/loss',
+         'main/accuracy', 'validation/main/accuracy', 'elapsed_time']),
+        call_before_training=True)
+
+    # Print a progress bar to stdout
+    trainer.extend(extensions.ProgressBar())
+
+    if args.resume is not None:
+        # Resume from a snapshot (Note: this loaded model is to be
+        # overwritten by --autoload option, autoloading snapshots, if
+        # any snapshots exist in output directory)
+        chainer.serializers.load_npz(args.resume, trainer)
+
+    # BEGIN ADDITIONAL TEST CODE
+    del trainer._extensions['ProgressBar']
+    # END ADDITIONAL TEST CODE
+    # Run the training
+    trainer.run()
+
+
+    ~chainerx.ndarray: Joined array.
+
+Note:
+    During backpropagation, this function propagates the gradient of the
+    output array to the input arrays in ``arrays``.
+
+.. seealso:: :func:`numpy.concatenate`
+""")
+
+    _docs.set_doc(
+        chainerx.stack,
+        """stack(arrays, axis=0)
+Stacks arrays along a new axis.
+
+Args:
+    arrays (sequence of :class:`~chainerx.ndarray`\\ s): Arrays to be stacked.
+    axis (int): Axis along which the arrays are stacked.
+
+Returns:
+    ~chainerx.ndarray: Stacked array.
+
+Note:
+    During backpropagation, this function propagates the gradient of the
+    output array to the input arrays in ``arrays``.
+
+.. seealso:: :func:`numpy.stack`
+""")
+
+    _docs.set_doc(
+        chainerx.hstack,
+        """hstack(arrays)
+Stack arrays in sequence horizontally (column wise).
+
+Args:
+    arrays (sequence of :class:`~chainerx.ndarray`\\ s): Arrays to be stacked.
+
+Returns:
+    ~chainerx.ndarray: Stacked array.
+
+Note:
+    During backpropagation, this function propagates the gradient of the
+    output array to the input arrays in ``arrays``.
+
+.. seealso:: :func:`numpy.hstack`
+""")
+
+    _docs.set_doc(
+        chainerx.vstack,
+        """vstack(arrays)
+Stack arrays in sequence vertically (row wise).
+
+Args:
+    arrays (sequence of :class:`~chainerx.ndarray`\\ s): Arrays to be stacked.
+
+Returns:
+    ~chainerx.ndarray: Stacked array.
+
+Note:
+    During backpropagation, this function propagates the gradient of the
+    output array to the input arrays in ``arrays``.
+
+.. seealso:: :func:`numpy.vstack`
+""")
+
+    _docs.set_doc(
+        chainerx.dstack,
+        """dstack(arrays)
+Stack arrays in sequence depth wise (along third axis).
+
+Args:
+    arrays (sequence of :class:`~chainerx.ndarray`\\ s): Arrays to be stacked.
+
+Returns:
+    ~chainerx.ndarray: Stacked array.
+
+Note:
+    During backpropagation, this function propagates the gradient of the
+    output array to the input arrays in ``arrays``.
+
+.. seealso:: :func:`numpy.dstack`
+""")
+
+    _docs.set_doc(
+        chainerx.atleast_2d,
+        """atleast_2d(a)
+View inputs as arrays with at least two dimensions.
+
+Args:
+    a (~chainerx.ndarray): Array.
+
+Returns:
+    ~chainerx.ndarray: An array with a.ndim >= 2.
+    Copies are avoided where possible, and views with
+    two or more dimensions are returned.
+
+Note:
+    * Arrays that already have two or more dimensions are preserved.
+    * During backpropagation, this function propagates the gradient of the
+      output array to the input arrays in ``a``.
+
+.. seealso:: :func:`numpy.atleast_2d`
+""")
+
+    _docs.set_doc(
+        chainerx.atleast_3d,
+        """atleast_3d(a)
+View inputs as arrays with at least three dimensions.
+
+Args:
+    a (~chainerx.ndarray): Array.
+
+Returns:
+    ~chainerx.ndarray: An array with a.ndim >= 3.
+    Copies are avoided where possible, and views with
+    three or more dimensions are returned.
+
+Note:
+    * Arrays that already have three or more dimensions are preserved.
+    * During backpropagation, this function propagates the gradient of the
+      output array to the input arrays in ``a``.
+
+.. seealso:: :func:`numpy.atleast_3d`
+""")
+
+    _docs.set_doc(
+        chainerx.split,
+        """split(ary, indices_or_sections, axis=0)
+Splits an array into multiple sub arrays along a given axis.
+
+Args:
+    ary (~chainerx.ndarray): Array to split.
+    indices_or_sections (int or sequence of ints): A value indicating how to
+        divide the axis. If it is an integer, then is treated as the number of
+        sections, and the axis is evenly divided. Otherwise, the integers
+        indicate indices to split at. Note that a sequence on the device
+        memory is not allowed.
+    axis (int): Axis along which the array is split.
+
+Returns:
+    list of :class:`~chainerx.ndarray`\\ s: A list of sub arrays. Each array \
+is a partial view of the input array.
+
+Note:
+    During backpropagation, this function propagates the gradients of the
+    output arrays to the input array ``ary``.
+
+.. seealso:: :func:`numpy.split`
+""")
+
+    _docs.set_doc(
+        chainerx.dsplit,
+        """dsplit(ary, indices_or_sections)
+Split array into multiple sub-arrays along the 3rd axis (depth).
+
+Args:
+    ary (~chainerx.ndarray): Array to split.
+    indices_or_sections (int or sequence of ints): A value indicating how to
+        divide the axis. If it is an integer, then is treated as the number of
+        sections, and the axis is evenly divided. Otherwise, the integers
+        indicate indices to split at. Note that a sequence on the device
+        memory is not allowed.
+
+Returns:
+    list of :class:`~chainerx.ndarray`\\ s: A list of sub arrays. Each array \
+is a partial view of the input array.
+
+Note:
+    During backpropagation, this function propagates the gradients of the
+    output arrays to the input array ``ary``.
+
+.. seealso:: :func:`numpy.dsplit`
+""")
+
+    _docs.set_doc(
+        chainerx.vsplit,
+        """vsplit(ary, indices_or_sections)
+Splits an array into multiple sub-arrays vertically (row-wise).
+
+Args:
+    ary (~chainerx.ndarray): Array to split.
+    indices_or_sections (int or sequence of ints): A value indicating how to
+        divide the axis. If it is an integer, then is treated as the number of
+        sections, and the axis is evenly divided. Otherwise, the integers
+        indicate indices to split at. Note that a sequence on the device
+        memory is not allowed.
+
+Returns:
+    list of :class:`~chainerx.ndarray`\\ s: A list of sub arrays. Each array \
+is a partial view of the input array.
+
+Note:
+    During backpropagation, this function propagates the gradients of the
+    output arrays to the input array ``ary``.
+
+.. seealso:: :func:`numpy.vsplit`
+""")
+
+    _docs.set_doc(
+        chainerx.hsplit,
+        """hsplit(ary, indices_or_sections)
+Split an array into multiple sub-arrays horizontally (column-wise).
+
+Args:
+    ary (~chainerx.ndarray): Array to split.
+    indices_or_sections (int or sequence of ints): A value indicating how to
+        divide the axis. If it is an integer, then is treated as the number of
+        sections, and the axis is evenly divided. Otherwise, the integers
+        indicate indices to split at. Note that a sequence on the device
+        memory is not allowed.
+
+Returns:
+    list of :class:`~chainerx.ndarray`\\ s: A list of sub arrays. Each array \
+is a partial view of the input array.
+
+Note:
+    During backpropagation, this function propagates the gradients of the
+    output arrays to the input array ``ary``.
+
+.. seealso:: :func:`numpy.hsplit`
+""")
+
+    _docs.set_doc(
+        chainerx.swapaxes,
+        """swapaxes(a, axis1, axis2)
+Interchange two axes of an array.
+
+Args:
+    a (~chainerx.ndarray): Array to swapaxes.
+    axis1 (int): First Axis
+    axis2 (int): Second Axis
+
+Returns:
+    ~chainerx.ndarray: Swaped array.
+
+Note:
+    * Output array is a view of the input array.
+    * During backpropagation, this function propagates the gradients of the
+      output arrays to the input array ``a``.
+
+
+.. seealso:: :func:`numpy.swapaxes`
+""")
+
+    _docs.set_doc(
+        chainerx.repeat,
+        """repeat(a, repeats, axis=None)
+Constructs an array by repeating a given array.
+
+Args:
+    a (~chainerx.ndarray): Array to repeat.
+    repeats (int or tuple of ints): The number of times which each
+        element of a is repeated.
+    axis (int): The axis along which to repeat values.
+
+Returns:
+    ~chainerx.ndarray: The repeated output array.
+
+Note:
+    During backpropagation, this function propagates the gradient of the
+    output array to the input array ``a``.
+
+.. seealso:: :func:`numpy.repeat`
+""")
+
+    _docs.set_doc(
+        chainerx.expand_dims,
+        """expand_dims(a, axis)
+Expand the shape of an array.
+
+Args:
+    a (~chainerx.ndarray): Input Array.
+    axis (int): Position in the expanded axes where the new axis is placed.
+
+Returns:
+    ~chainerx.ndarray: Output array.
+
+Note:
+    * Output array may or may not be a view of the input array.
+    * During backpropagation, this function propagates the gradients of the
+      output arrays to the input array ``a``.
+
+
+.. seealso:: :func:`numpy.expand_dims`
+""")
+
+    _docs.set_doc(
+        chainerx.flip,
+        """flip(m, axis)
+Reverse the order of elements in an array along the given axis.
+
+Args:
+    m (~chainerx.ndarray): Input Array.
+    axis (int or tuple of ints): Axis or axes along which to flip over.
+    The default, axis=None, will flip over all of the axes of the input array.
+    If axis is negative it counts from the last to the first axis.
+    If axis is a tuple of ints, flipping is performed on all of the
+    axes specified in the tuple.
+
+Returns:
+    ~chainerx.ndarray: A view of m with the entries of axis reversed.
+    Since a view is returned, this operation is done in constant time.
+
+Note:
+    * Output array is a view of the input array.
+    * During backpropagation, this function propagates the gradients of the
+      output arrays to the input array ``m``.
+
+
+.. seealso:: :func:`numpy.flip`
+""")
+
+    _docs.set_doc(
+        chainerx.fliplr,
+        """fliplr(m)
+Flip array in the left/right direction.
+
+Args:
+    m (~chainerx.ndarray): Input Array.
+
+Returns:
+    ~chainerx.ndarray: A view of m with the columns reversed.
+    Since a view is returned, this operation is done in constant time.
+
+Note:
+    * Output array is a view of the input array.
+    * During backpropagation, this function propagates the gradients of the
+      output arrays to the input array ``m``.
+
+
+.. seealso:: :func:`numpy.fliplr`
+""")
+
+    _docs.set_doc(
+        chainerx.flipud,
+        """flipud(m)
+Flip array in the up/down direction.
+
+Args:
+    m (~chainerx.ndarray): Input Array.
+
+Returns:
+    ~chainerx.ndarray: A view of m with the rows reversed.
+    Since a view is returned, this operation is done in constant time.
+
+Note:
+    * Output array is a view of the input array.
+    * During backpropagation, this function propagates the gradients of the
+      output arrays to the input array ``m``.
+
+
+.. seealso:: :func:`numpy.flipud`
+""")
+
+    _docs.set_doc(
+        chainerx.moveaxis,
+        """moveaxis(a, source, destination)
+Move axes of an array to new positions.
+
+Other axes remain in their original order.
+
+Args:
+    a (~chainerx.ndarray): Input Array.
+    source (int or tuple of ints): Original positions of the axes to move.
+    These must be unique.
+    destintation (int or tuple of ints): Destination positions for each of
+    the original axes. These must also be unique.
+
+Returns:
+    ~chainerx.ndarray: Array with moved axes. This array is a view of the
+    input array.
+
+Note:
+    * During backpropagation, this function propagates the gradients of the
+      output arrays to the input array ``a``.
+
+
+.. seealso:: :func:`numpy.moveaxis`
+""")

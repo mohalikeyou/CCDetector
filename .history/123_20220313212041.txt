@@ -1,0 +1,36 @@
+<source file="systems/tflearn-0.5.0/tflearn/data_preprocessing.py" startline="236" endline="251" pcid="249">
+    def _compute_global_mean(self, dataset, session, limit=None):
+        """ Compute mean of a dataset. A limit can be specified for faster
+        computation, considering only 'limit' first elements. """
+        _dataset = dataset
+        mean = 0.
+        if isinstance(limit, int):
+            _dataset = _dataset[:limit]
+        if isinstance(_dataset, np.ndarray):
+            mean = np.mean(_dataset)
+        else:
+            # Iterate in case of non numpy data
+            for i in range(len(dataset)):
+                mean += np.mean(dataset[i]) / len(dataset)
+        self.global_mean.assign(mean, session)
+        return mean
+
+</source>
+
+<source file="systems/tflearn-0.5.0/tflearn/data_preprocessing.py" startline="252" endline="266" pcid="250">
+    def _compute_global_std(self, dataset, session, limit=None):
+        """ Compute std of a dataset. A limit can be specified for faster
+        computation, considering only 'limit' first elements. """
+        _dataset = dataset
+        std = 0.
+        if isinstance(limit, int):
+            _dataset = _dataset[:limit]
+        if isinstance(_dataset, np.ndarray):
+            std = np.std(_dataset)
+        else:
+            for i in range(len(dataset)):
+                std += np.std(dataset[i]) / len(dataset)
+        self.global_std.assign(std, session)
+        return std
+
+</source>
